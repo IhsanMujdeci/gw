@@ -2,10 +2,12 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"github.com/manifoldco/promptui"
 	"log"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
@@ -48,10 +50,16 @@ func main() {
 	}
 
 	splitString := strings.Split(result, " - ")
-	branch := strings.ReplaceAll(splitString[0], "'", "")
-	branch = strings.ReplaceAll(branch, "*", "")
-	branch = strings.ReplaceAll(branch, " ", "")
 
-	fmt.Println(branch)
-	fmt.Println("new outs")
+	var re = regexp.MustCompile(`'[*]* +`)
+	branch := re.ReplaceAllString(strings.Trim(splitString[0], " "), "$1")
+
+	switchBranch := exec.Command("git", "checkout", branch)
+	if errors.Is(switchBranch.Err, exec.ErrDot) {
+		cmd.Err = nil
+	}
+	if err := switchBranch.Run(); err != nil {
+		log.Fatal(err)
+	}
+
 }
