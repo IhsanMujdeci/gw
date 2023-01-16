@@ -6,6 +6,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"log"
 	"os/exec"
+	"strings"
 )
 
 func main() {
@@ -35,7 +36,7 @@ func main() {
 	}
 
 	prompt := promptui.Select{
-		Label: "Select Day",
+		Label: "Select Branch",
 		Items: gitOutPut,
 	}
 
@@ -46,5 +47,11 @@ func main() {
 		return
 	}
 
-	fmt.Printf("You choose %q\n", result)
+	splitString := strings.Split(result, " - ")
+	branch := strings.ReplaceAll(splitString[0], "'", "")
+	branch = strings.ReplaceAll(branch, "*", "")
+	branch = strings.ReplaceAll(branch, " ", "")
+
+	fmt.Println(branch)
+	fmt.Println("new outs")
 }
