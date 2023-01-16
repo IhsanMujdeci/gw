@@ -30,7 +30,7 @@ func main() {
 	in := bufio.NewScanner(stdout)
 
 	for in.Scan() {
-		gitOutPut = append(gitOutPut, in.Text())
+		gitOutPut = append(gitOutPut, strings.Trim(in.Text(), "' "))
 		//log.Printf(in.Text()) // write each line to your log, or anything you need
 	}
 	if err := in.Err(); err != nil {
@@ -51,7 +51,7 @@ func main() {
 
 	splitString := strings.Split(result, " - ")
 
-	var re = regexp.MustCompile(`'[*]* +`)
+	var re = regexp.MustCompile(`[*]* +`)
 	branch := re.ReplaceAllString(strings.Trim(splitString[0], " "), "$1")
 
 	switchBranch := exec.Command("git", "checkout", branch)
