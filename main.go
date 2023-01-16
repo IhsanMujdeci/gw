@@ -15,7 +15,15 @@ func main() {
 
 	var gitOutPut []string
 
-	cmd := exec.Command("git", "for-each-ref", "--count=10", "--sort=-committerdate", "refs/heads/", "--format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'")
+	cmd := exec.Command(
+		"git",
+		"for-each-ref",
+		"--count=10",
+		"--sort=-committerdate",
+		"refs/heads/",
+		"--format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'",
+	)
+
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		log.Fatal(err)
@@ -49,7 +57,7 @@ func main() {
 
 	splitString := strings.Split(result, " - ")
 
-	// Remove the * from current branch
+	// Strip any stars and spaces after for current branch
 	var re = regexp.MustCompile(`[*]* +`)
 	branch := re.ReplaceAllString(splitString[0], "$1")
 
