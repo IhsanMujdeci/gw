@@ -26,12 +26,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// read command's stdout line by line
 	in := bufio.NewScanner(stdout)
 
 	for in.Scan() {
 		gitOutPut = append(gitOutPut, strings.Trim(in.Text(), "' "))
-		//log.Printf(in.Text()) // write each line to your log, or anything you need
 	}
 	if err := in.Err(); err != nil {
 		log.Printf("error: %s", err)
@@ -52,7 +50,7 @@ func main() {
 	splitString := strings.Split(result, " - ")
 
 	var re = regexp.MustCompile(`[*]* +`)
-	branch := re.ReplaceAllString(strings.Trim(splitString[0], " "), "$1")
+	branch := re.ReplaceAllString(splitString[0], "$1")
 
 	switchBranch := exec.Command("git", "checkout", branch)
 	if errors.Is(switchBranch.Err, exec.ErrDot) {
