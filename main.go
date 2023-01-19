@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"github.com/manifoldco/promptui"
 	"log"
@@ -13,9 +12,9 @@ import (
 
 func main() {
 
-	var gitOutPut []string
+	//var gitOutPut []string
 
-	cmd := exec.Command(
+	gitBranchCommand := exec.Command(
 		"git",
 		"for-each-ref",
 		"--count=10",
@@ -24,23 +23,9 @@ func main() {
 		"--format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'",
 	)
 
-	stdout, err := cmd.StdoutPipe()
+	gitOutPut, err := cmdRun(gitBranchCommand)
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	// start the command after having set up the pipe
-	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
-	}
-
-	in := bufio.NewScanner(stdout)
-
-	for in.Scan() {
-		gitOutPut = append(gitOutPut, strings.Trim(in.Text(), "' "))
-	}
-	if err := in.Err(); err != nil {
-		log.Printf("error: %s", err)
 	}
 
 	prompt := promptui.Select{
@@ -62,11 +47,26 @@ func main() {
 	branch := re.ReplaceAllString(splitString[0], "$1")
 
 	switchBranch := exec.Command("git", "checkout", branch)
-	if errors.Is(switchBranch.Err, exec.ErrDot) {
-		cmd.Err = nil
-	}
-	if err := switchBranch.Run(); err != nil {
+
+	switchBranchOutput, err := cmdRun(switchBranch)
+	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(strings.Join(switchBranchOutput[:], "\n"))
+}
 
+func cmdRun(cmd *exec.Cmd) (output []string, err error) {
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return output, err
+	}
+	// start the command after having set up the pipe
+	if err := cmd.Start(); err != nil {
+		return output, err
+	}
+	in := bufio.NewScanner(stdout)
+	for in.Scan() {
+		output = append(output, strings.Trim(in.Text(), "' "))
+	}
+	return output, in.Err()
 }
